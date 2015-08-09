@@ -1,12 +1,30 @@
+require "./stanene/message"
+
 class Agent
   getter inbox
-  def initialize(channel : Channel, initial_state : T)
-    puts "SPAWNING AGENT..."
-    @inbox = channel
-    @state = initial_state
-    @alive = true
-    receive
+  def initialize
+    @alive = false
   end
+
+  def start(initial_state : T)
+    @channel_type = T
+    @inbox        = Channel(Message).new
+    @outbox       = Channel(T | Message).new
+    @state        = initial_state
+    @alive        = true
+    spawn { receive }
+  end
+
+  def send(message : Message)
+    @inbox.send(message)
+    :ok
+  end
+
+  def get_response
+    @outbox.receive
+  end
+
+
 
   def receive
     puts "RECIEVING..."
